@@ -1,0 +1,491 @@
+const fs = require('fs');
+const path = require('path');
+
+const initial10 = [
+  {
+    id: 'med-101',
+    name: 'Paracetamol 500mg (Dolo-650 / Panadol)',
+    genericName: 'Paracetamol (Acetaminophen)',
+    brandName: 'Dolo / Panadol',
+    manufacturer: 'Micro Labs Ltd',
+    category: 'Analgesic & Antipyretic',
+    dosageForm: 'Tablet',
+    strength: '500mg',
+    uses: 'Fever reduction, relief of mild to moderate pain including headache, body ache, and toothache.',
+    precautions: 'Do not exceed recommended daily dose of 4g. Caution in liver disease or severe renal impairment.',
+    sideEffects: 'Rarely allergic reactions, skin rash, liver toxicity in case of overdose.',
+    storage: 'Store below 30°C in a dry place protected from direct sunlight.',
+    prescriptionRequired: false,
+    availabilityStatus: 'AVAILABLE',
+    price: 15.50,
+    description: 'Paracetamol is a widely used over-the-counter pain reliever and fever reducer.',
+    drugInteractions: 'Warfarin (enhances anticoagulation effect with prolonged heavy use), Alcohol (increased liver risk).',
+    stockCount: 450
+  },
+  {
+    id: 'med-102',
+    name: 'Amoxicillin 500mg Capsule',
+    genericName: 'Amoxicillin Trihydrate',
+    brandName: 'Mox 500 / Novamox',
+    manufacturer: 'Sun Pharmaceutical Industries',
+    category: 'Antibiotic (Penicillin)',
+    dosageForm: 'Capsule',
+    strength: '500mg',
+    uses: 'Bacterial infections of throat, ear, respiratory tract, urinary tract, and dental infections.',
+    precautions: 'Complete full course as prescribed. Contraindicated in penicillin-allergic patients.',
+    sideEffects: 'Nausea, diarrhea, allergic rash, abdominal discomfort.',
+    storage: 'Store in a cool dry place below 25°C.',
+    prescriptionRequired: true,
+    availabilityStatus: 'AVAILABLE',
+    price: 85.00,
+    description: 'Amoxicillin is a broad-spectrum antibiotic used to treat a variety of bacterial infections.',
+    drugInteractions: 'Probenecid, Methotrexate, Oral Contraceptives (may reduce efficacy).',
+    stockCount: 180
+  },
+  {
+    id: 'med-103',
+    name: 'Metformin Hydrochloride 500mg SR',
+    genericName: 'Metformin Hydrochloride',
+    brandName: 'Glycomet SR / Glucophage',
+    manufacturer: 'USV Pvt Ltd',
+    category: 'Anti-Diabetic',
+    dosageForm: 'Sustained Release Tablet',
+    strength: '500mg',
+    uses: 'Management of Type 2 Diabetes Mellitus to lower blood glucose levels.',
+    precautions: 'Take with or after meals. Monitor renal function and blood glucose regularly. Risk of lactic acidosis.',
+    sideEffects: 'Metallic taste, mild stomach upset, nausea, vitamin B12 deficiency with long term use.',
+    storage: 'Store at room temperature away from heat and moisture.',
+    prescriptionRequired: true,
+    availabilityStatus: 'AVAILABLE',
+    price: 42.00,
+    description: 'First-line medication for the treatment of type 2 diabetes.',
+    drugInteractions: 'Cimetidine, Iodinated contrast dyes, Alcohol.',
+    stockCount: 320
+  },
+  {
+    id: 'med-104',
+    name: 'Atorvastatin 10mg Tablet',
+    genericName: 'Atorvastatin Calcium',
+    brandName: 'Lipitor / Atorva',
+    manufacturer: 'Zydus Cadila',
+    category: 'Cardiovascular / Statin',
+    dosageForm: 'Tablet',
+    strength: '10mg',
+    uses: 'Lowering elevated total cholesterol, LDL-C, and triglycerides; preventing cardiovascular disease.',
+    precautions: 'Avoid grapefruit juice in large quantities. Monitor liver enzymes during therapy.',
+    sideEffects: 'Muscle pain (myalgia), joint pain, digestive upset, elevated liver enzymes.',
+    storage: 'Store below 25°C in controlled room temperature.',
+    prescriptionRequired: true,
+    availabilityStatus: 'AVAILABLE',
+    price: 110.00,
+    description: 'Lipid-lowering medication used to reduce the risk of heart disease.',
+    drugInteractions: 'Clarithromycin, Ketoconazole, Gemfibrozil, Cyclosporine.',
+    stockCount: 210
+  },
+  {
+    id: 'med-105',
+    name: 'Omeprazole 20mg Capsule',
+    genericName: 'Omeprazole Magnesium',
+    brandName: 'Omez / Prilosec',
+    manufacturer: 'Dr. Reddy\'s Laboratories',
+    category: 'Gastrointestinal / PPI',
+    dosageForm: 'Capsule',
+    strength: '20mg',
+    uses: 'GERD (Acid Reflux), gastric ulcers, Zollinger-Ellison syndrome, and H. pylori eradication.',
+    precautions: 'Take 30 minutes before breakfast. Long-term use may impair calcium and magnesium absorption.',
+    sideEffects: 'Headache, stomach pain, flatulence, diarrhea.',
+    storage: 'Keep container tightly closed, store below 25°C.',
+    prescriptionRequired: false,
+    availabilityStatus: 'LOW STOCK',
+    price: 68.00,
+    description: 'Proton pump inhibitor that decreases the amount of acid produced in the stomach.',
+    drugInteractions: 'Clopidogrel, Digoxin, Diazepam, Ketoconazole.',
+    stockCount: 25
+  },
+  {
+    id: 'med-106',
+    name: 'Ibuprofen 400mg Tablet',
+    genericName: 'Ibuprofen',
+    brandName: 'Brufen / Advil',
+    manufacturer: 'Abbott Healthcare',
+    category: 'Analgesic & Antipyretic',
+    dosageForm: 'Tablet',
+    strength: '400mg',
+    uses: 'Pain relief, inflammatory joint conditions, arthritis, menstrual pain, muscular sprains.',
+    precautions: 'Take with food or milk to prevent stomach bleeding. Avoid in active peptic ulcer disease.',
+    sideEffects: 'Gastric irritation, heartburn, dizziness, potential elevation of blood pressure.',
+    storage: 'Store in a dry place at temperature not exceeding 30°C.',
+    prescriptionRequired: false,
+    availabilityStatus: 'AVAILABLE',
+    price: 28.00,
+    description: 'Non-steroidal anti-inflammatory drug (NSAID) used for treating pain, fever, and inflammation.',
+    drugInteractions: 'Aspirin, Antihypertensives, Methotrexate, Blood thinners.',
+    stockCount: 390
+  },
+  {
+    id: 'med-107',
+    name: 'Cetirizine Hydrochloride 10mg',
+    genericName: 'Cetirizine Hydrochloride',
+    brandName: 'Cetzine / Zyrtec',
+    manufacturer: 'Cipla Ltd',
+    category: 'Antihistamine / Allergy',
+    dosageForm: 'Tablet',
+    strength: '10mg',
+    uses: 'Relief of nasal & eye symptoms of seasonal allergic rhinitis, chronic urticaria, allergic itching.',
+    precautions: 'May cause mild drowsiness. Avoid driving or operating machinery if affected.',
+    sideEffects: 'Drowsiness, fatigue, dry mouth, headache.',
+    storage: 'Store protected from light and moisture at room temperature.',
+    prescriptionRequired: false,
+    availabilityStatus: 'AVAILABLE',
+    price: 35.00,
+    description: 'Second-generation antihistamine used to treat allergic conditions.',
+    drugInteractions: 'CNS depressants, Alcohol, Sedatives.',
+    stockCount: 500
+  },
+  {
+    id: 'med-108',
+    name: 'Azithromycin 500mg Tablet',
+    genericName: 'Azithromycin Dihydrate',
+    brandName: 'Azee 500 / Zithromax',
+    manufacturer: 'Cipla Ltd',
+    category: 'Antibiotic (Macrolide)',
+    dosageForm: 'Tablet',
+    strength: '500mg',
+    uses: 'Respiratory tract infections, skin infections, sexually transmitted infections.',
+    precautions: 'Take 1 hour before or 2 hours after meals. Monitor ECG if history of prolonged QT interval.',
+    sideEffects: 'Diarrhea, vomiting, abdominal pain, temporary alteration in taste.',
+    storage: 'Store below 30°C in original package.',
+    prescriptionRequired: true,
+    availabilityStatus: 'OUT OF STOCK',
+    price: 118.00,
+    description: 'Macrolide-type antibiotic that slows the growth of, or sometimes kills, bacteria.',
+    drugInteractions: 'Antacids containing aluminum/magnesium, Warfarin, Digoxin.',
+    stockCount: 0
+  },
+  {
+    id: 'med-109',
+    name: 'Amlodipine 5mg Tablet',
+    genericName: 'Amlodipine Besylate',
+    brandName: 'Amlopress / Norvasc',
+    manufacturer: 'Torrent Pharmaceuticals',
+    category: 'Cardiovascular / Statin',
+    dosageForm: 'Tablet',
+    strength: '5mg',
+    uses: 'Hypertension (High Blood Pressure) and Angina Pectoris (Chest pain).',
+    precautions: 'Monitor blood pressure regularly. Do not stop abruptly without doctor advice.',
+    sideEffects: 'Peripheral edema (swelling of ankles/feet), flushing, dizziness, palpitations.',
+    storage: 'Store protected from light and moisture below 30°C.',
+    prescriptionRequired: true,
+    availabilityStatus: 'AVAILABLE',
+    price: 32.00,
+    description: 'Calcium channel blocker used to treat high blood pressure and coronary artery disease.',
+    drugInteractions: 'Simvastatin, Tacrolimus, Sildenafil, CYP3A4 inhibitors.',
+    stockCount: 290
+  },
+  {
+    id: 'med-110',
+    name: 'Pantoprazole 40mg Tablet',
+    genericName: 'Pantoprazole Sodium',
+    brandName: 'Pan 40 / Pantocid',
+    manufacturer: 'Alkem Laboratories',
+    category: 'Gastrointestinal / PPI',
+    dosageForm: 'Gastro-resistant Tablet',
+    strength: '40mg',
+    uses: 'Erosive esophagitis, GERD, and stomach ulcers.',
+    precautions: 'Swallow whole, do not crush or chew. Take before first meal of the day.',
+    sideEffects: 'Headache, diarrhea, nausea, abdominal pain.',
+    storage: 'Store below 25°C in a dry place.',
+    prescriptionRequired: true,
+    availabilityStatus: 'LOW STOCK',
+    price: 75.00,
+    description: 'Reduces stomach acid creation in patients suffering from acid reflux.',
+    drugInteractions: 'Atazanavir, Methotrexate, Warfarin.',
+    stockCount: 12
+  }
+];
+
+const items = [
+  // Analgesic & Antipyretic
+  ["Diclofenac Sodium 50mg Tablet", "Diclofenac Sodium", "Voveran 50", "Novartis / Cipla", "Analgesic & Antipyretic", "Tablet", "50mg", "Relief of rheumatoid arthritis, osteoarthritis, acute gout, ankylosing spondylitis.", "Take after food. Avoid in kidney failure.", "Nausea, heartburn, stomach upset.", "Store below 25°C.", false, "AVAILABLE", 45.0, 310, "NSAID pain reliever for joint pain."],
+  ["Aceclofenac 100mg + Paracetamol 325mg", "Aceclofenac + Paracetamol", "Zerodol-P", "IPCA Laboratories", "Analgesic & Antipyretic", "Tablet", "100mg/325mg", "Management of severe muscle pain, back pain, and dental pain.", "Avoid long-term continuous use without gastric protection.", "Abdominal pain, dizziness, rash.", "Store in a dry cool place.", false, "AVAILABLE", 65.0, 240, "Combination anti-inflammatory and fever control medication."],
+  ["Mefenamic Acid 500mg Tablet", "Mefenamic Acid", "Meftal 500", "Blue Cross Laboratories", "Analgesic & Antipyretic", "Tablet", "500mg", "Short term relief of mild to moderate pain, dysmenorrhea, heavy bleeding pain.", "Take with food to minimize gastric irritation.", "Drowsiness, diarrhea, dyspepsia.", "Store protected from direct light.", false, "AVAILABLE", 38.0, 190, "Analgesic used for menstrual cramps and general pain."],
+  ["Tramadol Hydrochloride 50mg Capsule", "Tramadol Hydrochloride", "Ultram / Tramazac", "Zydus Lifesciences", "Analgesic & Antipyretic", "Capsule", "50mg", "Moderate to severe post-surgical pain or severe acute body pain.", "Potential habit forming. Use strictly under prescription.", "Dizziness, nausea, constipation, sedation.", "Store below 30°C.", true, "AVAILABLE", 140.0, 85, "Centrally acting opioid analgesic."],
+  ["Volini Pain Relief Gel 30g", "Diclofenac Diethylamine + Linseed Oil", "Volini Gel", "Sun Pharmaceutical Industries", "Analgesic & Antipyretic", "Gel", "30g Tube", "Topical relief for sprains, strains, neck pain, low backache, and joint stiffness.", "For external application only. Do not apply on open wounds.", "Mild localized skin redness or itching.", "Store in a cool place, do not freeze.", false, "AVAILABLE", 115.0, 150, "Fast acting topical pain relief gel."],
+  ["Moov Pain Relief Cream 50g", "Wintergreen Oil + Menthol + Turpentine Oil", "Moov Cream", "Reckitt Benckiser", "Analgesic & Antipyretic", "Cream", "50g Tube", "Relief of backache, joint pain, muscle pain, and sprains.", "Avoid contact with eyes and mucous membranes.", "Local skin warmth or mild irritation.", "Store below 25°C.", false, "AVAILABLE", 165.0, 220, "Ayurvedic topical pain ointment."],
+  ["Paracetamol Suspension 120mg/5ml (Pediatric)", "Paracetamol", "Calpol Peadiatric", "GlaxoSmithKline", "Pediatric Care", "Syrup", "120mg/5ml", "Pediatric fever and mild pain relief in infants and children.", "Follow bodyweight dosage strictly.", "Excessive dose may lead to liver damage.", "Store below 30°C.", false, "AVAILABLE", 48.0, 175, "Kid-friendly strawberry flavored antipyretic syrup."],
+  ["Combiflam Tablet (Ibuprofen + Paracetamol)", "Ibuprofen + Paracetamol", "Combiflam", "Sanofi India", "Analgesic & Antipyretic", "Tablet", "400mg/325mg", "Dual action relief for headache, body pain, toothache, and fever.", "Do not take on an empty stomach.", "Acidity, mild gastric pain.", "Store in a cool dry place.", false, "AVAILABLE", 24.0, 420, "Popular dual pain reliever tablet."],
+  ["Naproxen 500mg Tablet", "Naproxen Sodium", "Naprosyn 500", "RPG Life Sciences", "Analgesic & Antipyretic", "Tablet", "500mg", "Treatment of migraine attacks, gout flare-ups, and tendinitis.", "Monitor for signs of GI bleeding.", "Heartburn, dizziness, ringing in ears.", "Store below 25°C.", true, "AVAILABLE", 88.0, 110, "Long-acting NSAID pain medication."],
+
+  // Antibiotics
+  ["Ciprofloxacin 500mg Tablet", "Ciprofloxacin Hydrochloride", "Cifran 500", "Sun Pharmaceutical Industries", "Antibiotic (Penicillin)", "Tablet", "500mg", "Urinary tract infections, typhoid fever, severe infectious diarrhea.", "Drink plenty of water. Avoid taking with dairy products.", "Nausea, tendon pain, headache.", "Store away from heat and moisture.", true, "AVAILABLE", 92.0, 145, "Broad spectrum fluoroquinolone antibiotic."],
+  ["Levofloxacin 500mg Tablet", "Levofloxacin", "Levin 500 / Tavanic", "Lupin Ltd", "Antibiotic (Penicillin)", "Tablet", "500mg", "Community acquired pneumonia, acute sinusitis, complicated UTI.", "Maintain high fluid intake during treatment.", "Insomnia, dizziness, nausea.", "Store below 30°C.", true, "AVAILABLE", 105.0, 95, "Second-generation fluoroquinolone antibiotic."],
+  ["Cefixime 200mg Tablet", "Cefixime Trihydrate", "Taxim-O 200", "Alkem Laboratories", "Antibiotic (Penicillin)", "Tablet", "200mg", "Typhoid fever, otitis media, pharyngitis, uncomplicated gonorrhea.", "Complete prescribed dosage course.", "Loose stools, abdominal cramping, flatulence.", "Store in dry place below 25°C.", true, "AVAILABLE", 115.0, 130, "Third-generation oral cephalosporin antibiotic."],
+  ["Cefuroxime Axetil 500mg Tablet", "Cefuroxime Axetil", "Ceftum 500", "GlaxoSmithKline", "Antibiotic (Penicillin)", "Tablet", "500mg", "Severe throat infection, Lyme disease, skin structure infections.", "Take immediately after a heavy meal for maximum absorption.", "Diarrhea, transient liver enzyme elevation.", "Store below 25°C.", true, "AVAILABLE", 480.0, 60, "Second-generation cephalosporin antibiotic."],
+  ["Doxycycline Hyclate 100mg Capsule", "Doxycycline Hyclate", "Dox-SL / Monodox", "Dr. Reddy's Laboratories", "Antibiotic (Penicillin)", "Capsule", "100mg", "Acne vulgaris, cholera, rickettsial infections, malaria prophylaxis.", "Do not lie down for 30 mins after ingestion to prevent esophageal ulceration.", "Photosensitivity, esophageal irritation.", "Store in tight light-resistant container.", true, "AVAILABLE", 72.0, 210, "Tetracycline derivative antibiotic."],
+  ["Clarithromycin 500mg Tablet", "Clarithromycin", "Claribid 500", "Mankind Pharma", "Antibiotic (Macrolide)", "Tablet", "500mg", "Helicobacter pylori stomach infection, atypical pneumonia, tonsillitis.", "May leave metallic taste in mouth.", "Nausea, vomiting, altered taste perception.", "Store below 25°C.", true, "LOW STOCK", 225.0, 14, "Macrolide antibiotic for respiratory & GI infections."],
+  ["Metronidazole 400mg Tablet", "Metronidazole", "Flagyl 400", "Abbott India", "Antibiotic (Penicillin)", "Tablet", "400mg", "Amoebic dysentery, giardiasis, anaerobic bacterial infections.", "Strictly avoid alcohol during treatment and 48h after.", "Metallic taste, dark urine, nausea.", "Store below 30°C.", true, "AVAILABLE", 22.0, 350, "Antiprotozoal and antibacterial medication."],
+  ["Norfloxacin 400mg + Tinidazole 600mg", "Norfloxacin + Tinidazole", "Norflox-TZ", "Cipla Ltd", "Antibiotic (Penicillin)", "Tablet", "400mg/600mg", "Diarrhea and dysentery of mixed bacterial and protozoal origin.", "Take with meals. Avoid alcohol consumption.", "Nausea, headache, metallic taste.", "Store below 25°C.", true, "AVAILABLE", 98.0, 180, "Combined antidiarrheal antimicrobial tablet."],
+  ["Ofloxacin 200mg + Ornidazole 500mg", "Ofloxacin + Ornidazole", "Oflomac-OZ", "Mankind Pharma", "Antibiotic (Penicillin)", "Tablet", "200mg/500mg", "Gastroenteritis, pelvic inflammatory disease, dental infections.", "Complete the full antibiotic regimen.", "Dizziness, sleep disturbance, dry mouth.", "Store in a cool dry location.", true, "AVAILABLE", 135.0, 160, "Synergistic antibiotic and antiprotozoal drug."],
+  ["Co-Amoxiclav Oral Suspension 228mg/5ml", "Amoxicillin + Potassium Clavulanate", "Moxikind-CV Dry Syrup", "Mankind Pharma", "Pediatric Care", "Syrup", "200mg+28.5mg/5ml", "Pediatric bacterial bronchitis, middle ear infections, skin infections.", "Reconstitute with sterile water. Store reconstituted suspension in fridge.", "Mild diarrhea, oral candidiasis.", "Store dry powder below 25°C.", true, "AVAILABLE", 64.0, 90, "Clavulanate-potentiated broad spectrum antibiotic suspension."],
+
+  // Anti-Diabetic
+  ["Glimepiride 1mg Tablet", "Glimepiride", "Amaryl 1mg / Glypride", "Sanofi India", "Anti-Diabetic", "Tablet", "1mg", "Management of type 2 diabetes mellitus alongside diet and exercise.", "Risk of hypoglycemia if meals are skipped.", "Hypoglycemia, weight gain, dizziness.", "Store below 30°C.", true, "AVAILABLE", 55.0, 200, "Sulfonylurea class antidiabetic drug."],
+  ["Glimepiride 2mg + Metformin 500mg SR", "Glimepiride + Metformin", "Glycomet-GP 2", "USV Pvt Ltd", "Anti-Diabetic", "Tablet", "2mg/500mg", "Dual drug therapy for uncontrolled Type 2 Diabetes Mellitus.", "Take before or with morning meal.", "Low blood sugar, flatulence, headache.", "Store below 25°C.", true, "AVAILABLE", 128.0, 270, "Bestselling dual anti-diabetic combination."],
+  ["Sitagliptin 100mg Tablet", "Sitagliptin Phosphate", "Januvia 100", "MSD / Sun Pharma", "Anti-Diabetic", "Tablet", "100mg", "DPP-4 inhibitor for type 2 diabetes control.", "Monitor for persistent severe abdominal pain (pancreatitis).", "Upper respiratory infection, headache, joint pain.", "Store below 30°C.", true, "AVAILABLE", 420.0, 75, "Dipeptidyl peptidase-4 (DPP-4) inhibitor."],
+  ["Vildagliptin 50mg Tablet", "Vildagliptin", "Galvus 50 / Zomelis", "Novartis / Anfarm", "Anti-Diabetic", "Tablet", "50mg", "Type 2 diabetes glycemic control in mono or combination therapy.", "Conduct liver function test before initiating treatment.", "Tremors, headache, dizziness, peripheral edema.", "Store below 30°C.", true, "AVAILABLE", 195.0, 130, "DPP-4 inhibitor for blood sugar management."],
+  ["Empagliflozin 10mg Tablet", "Empagliflozin", "Jardiance 10", "Boehringer Ingelheim", "Anti-Diabetic", "Tablet", "10mg", "SGLT2 inhibitor for glycemic control and cardiovascular risk reduction.", "Maintain adequate daily water intake to reduce UTI risk.", "Urinary tract infection, increased urination, thirst.", "Store below 25°C.", true, "AVAILABLE", 650.0, 45, "SGLT-2 inhibitor for diabetes & heart failure protection."],
+  ["Dapagliflozin 10mg Tablet", "Dapagliflozin", "Forxiga 10 / Oxra", "AstraZeneca / Sun Pharma", "Anti-Diabetic", "Tablet", "10mg", "Type 2 diabetes, chronic kidney disease, and heart failure.", "Drink plenty of water throughout the day.", "Genital mycotic infections, polyuria.", "Store below 30°C.", true, "AVAILABLE", 710.0, 50, "Advanced SGLT2 inhibitor medication."],
+  ["Insulin Glargine 100 IU/ml Pre-filled Pen", "Insulin Glargine (rDNA origin)", "Lantus SoloStar Pen", "Sanofi India", "Anti-Diabetic", "Injection", "100 IU/ml", "Once-daily long-acting basal insulin for Type 1 & Type 2 Diabetes.", "Administer subcutaneously at the same time every day. Rotate injection site.", "Hypoglycemia, injection site lipodystrophy.", "Store unopened pens in refrigerator (2°C–8°C). Do not freeze.", true, "LOW STOCK", 850.0, 8, "Long acting recombinant basal insulin pen."],
+  ["Human Insulin 30/70 Injection 40IU/ml", "Human Insulin Biphasic (rDNA)", "Mixtard 30 HM 40IU", "Novo Nordisk", "Anti-Diabetic", "Injection", "40 IU/ml (10ml Vial)", "Biphasic human insulin for blood glucose regulation.", "Inject 30 minutes before meal.", "Low blood sugar, allergic reaction at site.", "Keep refrigerated (2°C-8°C).", true, "AVAILABLE", 190.0, 40, "Premixed fast & intermediate acting human insulin."],
+
+  // Cardiovascular & Cholesterol
+  ["Telmisartan 40mg Tablet", "Telmisartan", "Telma 40 / Tazloc", "Glenmark Pharmaceuticals", "Cardiovascular / Statin", "Tablet", "40mg", "Essential hypertension (High BP) and reduction of cardiovascular risk.", "Contraindicated during pregnancy.", "Dizziness, hyperkalemia, back pain.", "Store below 30°C.", true, "AVAILABLE", 95.0, 380, "Angiotensin II Receptor Blocker (ARB)."],
+  ["Telmisartan 40mg + Hydrochlorothiazide 12.5mg", "Telmisartan + Hydrochlorothiazide", "Telma-H", "Glenmark Pharmaceuticals", "Cardiovascular / Statin", "Tablet", "40mg/12.5mg", "Hypertension not adequately controlled with monotherapy.", "Monitor serum electrolytes regularly.", "Dizziness, electrolyte imbalance, fatigue.", "Store in a dry place.", true, "AVAILABLE", 130.0, 220, "Combined ARB and thiazide diuretic BP control."],
+  ["Losartan Potassium 50mg Tablet", "Losartan Potassium", "Repace 50 / Covance", "Sun Pharmaceutical Industries", "Cardiovascular / Statin", "Tablet", "50mg", "Hypertension, diabetic nephropathy in Type 2 diabetes.", "Regular blood pressure monitoring advised.", "Lightheadedness, hyperkalemia, nasal congestion.", "Store below 25°C.", true, "AVAILABLE", 78.0, 190, "First ARB antihypertensive drug."],
+  ["Ramipril 5mg Capsule", "Ramipril", "Cardace 5", "Sanofi India", "Cardiovascular / Statin", "Capsule", "5mg", "Hypertension, congestive heart failure, post-myocardial infarction.", "Notify doctor if persistent dry cough develops.", "Dry persistent cough, dizziness, headache.", "Store below 25°C.", true, "AVAILABLE", 112.0, 160, "ACE inhibitor for blood pressure and heart protection."],
+  ["Metoprolol Succinate 25mg ER Tablet", "Metoprolol Succinate", "Betaloc 25 ER / Metolar", "AstraZeneca / Cipla", "Cardiovascular / Statin", "Extended Release Tablet", "25mg", "Angina pectoris, hypertension, heart failure management.", "Do not stop suddenly to avoid rebound tachycardia.", "Bradycardia, fatigue, cold extremities.", "Store below 30°C.", true, "AVAILABLE", 84.0, 230, "Cardioselective beta-1 blocker."],
+  ["Rosuvastatin 10mg Tablet", "Rosuvastatin Calcium", "Rosuvas 10 / Crestor", "Sun Pharmaceutical Industries", "Cardiovascular / Statin", "Tablet", "10mg", "Hypercholesterolemia, prevention of heart attack and stroke.", "Avoid excessive alcohol intake.", "Muscle pain, weakness, headache, abdominal pain.", "Store below 30°C.", true, "AVAILABLE", 165.0, 260, "High potency statin lipid lowering drug."],
+  ["Clopidogrel 75mg Tablet", "Clopidogrel Bisulfate", "Plavix / Deplatt 75", "Sanofi / Torrent", "Cardiovascular / Statin", "Tablet", "75mg", "Antiplatelet agent to prevent blood clots in stroke and heart attack.", "Inform surgeon/dentist before procedures due to bleeding risk.", "Easy bruising, nosebleeds, gastrointestinal bleeding.", "Store below 25°C.", true, "AVAILABLE", 125.0, 200, "Antiplatelet blood thinner medication."],
+  ["Ecospirin 75mg Tablet (Enteric Coated)", "Aspirin (Acetylsalicylic Acid)", "Ecospirin 75", "USV Pvt Ltd", "Cardiovascular / Statin", "Tablet", "75mg", "Low dose aspirin for blood clot prevention in coronary artery disease.", "Take after food. Avoid if active peptic ulcer.", "Stomach irritation, minor bleeding.", "Store in a dry place below 25°C.", false, "AVAILABLE", 6.50, 600, "Enteric coated low dose preventative aspirin."],
+
+  // Gastrointestinal & Antacids
+  ["Rabeprazole 20mg + Domperidone 30mg SR", "Rabeprazole + Domperidone", "Rabeloc-D SR / Rantac-D", "Cadila / Sun Pharma", "Gastrointestinal / PPI", "Capsule", "20mg/30mg", "Severe acid reflux, GERD with nausea, dyspepsia.", "Take 30 minutes before morning breakfast.", "Dry mouth, headache, diarrhea.", "Store below 25°C.", false, "AVAILABLE", 145.0, 290, "Combination PPI and prokinetic capsule."],
+  ["Ranitidine 150mg Tablet", "Ranitidine Hydrochloride", "Rantac 150 / Aciloc", "J.B. Chemicals", "Gastrointestinal / PPI", "Tablet", "150mg", "Heartburn, acid indigestion, peptic ulcers.", "Take with glass of water before meals.", "Headache, constipation, fatigue.", "Store below 30°C.", false, "AVAILABLE", 22.0, 300, "H2 receptor antagonist antacid."],
+  ["Digene Gel Antacid Syrup 200ml (Mint)", "Magnesium Hydroxide + Aluminium Hydroxide + Simethicone", "Digene Gel", "Abbott India", "Gastrointestinal / PPI", "Syrup", "200ml Bottle", "Immediate relief from acidity, heartburn, gas, and stomach bloating.", "Shake bottle well before use.", "Constipation or mild laxative effect if taken excessively.", "Store at room temperature.", false, "AVAILABLE", 140.0, 210, "Popular mint flavored antacid oral gel."],
+  ["Gelusil MPS Antacid Liquid 200ml", "Aluminium Hydroxide + Magnesium Hydroxide + Dimethicone", "Gelusil MPS", "Pfizer / Abbott", "Gastrointestinal / PPI", "Syrup", "200ml Bottle", "Relief of hyperacidity, flatulence, heartburn, and stomach upset.", "Take 1-2 teaspoonfuls after meals.", "Mild constipation or diarrhea.", "Store below 30°C.", false, "AVAILABLE", 130.0, 180, "Sugar free antacid and antiflatulent liquid."],
+  ["Ondansetron 4mg Mouth Dissolving Tablet", "Ondansetron Hydrochloride", "Emset 4mg / Vomikind", "Cipla Ltd", "Gastrointestinal / PPI", "Dissolving Tablet", "4mg", "Prevention of nausea and vomiting induced by motion sickness, gastroenteritis.", "Allow tablet to dissolve on tongue without chewing.", "Headache, constipation, sensation of warmth.", "Store below 30°C.", false, "AVAILABLE", 48.0, 320, "Fast dissolving anti-nausea tablet."],
+  ["Loperamide Hydrochloride 2mg Capsule", "Loperamide Hydrochloride", "Imodium / Lopamide", "Janssen / Torrent", "Gastrointestinal / PPI", "Capsule", "2mg", "Symptomatic control of acute non-specific diarrhea.", "Drink plenty of oral rehydration fluids. Do not use in bloody dysentery.", "Constipation, dizziness, abdominal cramps.", "Store below 25°C.", false, "AVAILABLE", 25.0, 280, "Antidiarrheal intestinal motility inhibitor."],
+  ["ORS Powder Sachet 21.8g (WHO Formula)", "Oral Rehydration Salts (Glucose + Electrolytes)", "Electral Sachet", "FDC Ltd", "Gastrointestinal / PPI", "Sachet", "21.8g Sachet", "Restoration of body water and electrolytes lost during diarrhea & vomiting.", "Dissolve entire contents of 1 sachet in 1 liter of clean drinking water.", "None under recommended dilution.", "Store in a dry place.", false, "AVAILABLE", 22.0, 500, "WHO formulation oral rehydration electrolytes."],
+  ["Dulcolax 5mg Suppository / Tablet", "Bisacodyl", "Dulcolax 5", "Sanofi India", "Gastrointestinal / PPI", "Tablet", "5mg", "Overnight relief from constipation and bowel preparation.", "Take at bedtime with water.", "Abdominal cramps, nausea, diarrhea.", "Store below 25°C.", false, "AVAILABLE", 14.50, 240, "Stimulant laxative for constipation relief."],
+
+  // Antihistamines & Allergy & Respiratory
+  ["Levocetirizine 5mg Tablet", "Levocetirizine Dihydrochloride", "Levocet 5 / Xyzal", "Hetero Healthcare", "Antihistamine / Allergy", "Tablet", "5mg", "Allergic rhinitis, hay fever, chronic idiopathic urticaria, skin allergies.", "Take at bedtime. Non-sedating compared to older antihistamines.", "Mild somnolence, dry mouth, tiredness.", "Store below 30°C.", false, "AVAILABLE", 42.0, 340, "Purified active R-enantiomer of cetirizine."],
+  ["Montelukast 10mg + Levocetirizine 5mg", "Montelukast + Levocetirizine", "Monticope / Montek-LC", "Mankind Pharma", "Antihistamine / Allergy", "Tablet", "10mg/5mg", "Asthmatic allergy, allergic rhinitis, bronchospasm prevention.", "Take once daily in the evening.", "Headache, dizziness, upper abdominal pain.", "Store below 25°C.", true, "AVAILABLE", 165.0, 270, "Leukotriene receptor antagonist + antihistamine combo."],
+  ["Fexofenadine Hydrochloride 120mg", "Fexofenadine Hydrochloride", "Allegra 120", "Sanofi India", "Antihistamine / Allergy", "Tablet", "120mg", "Non-drowsy relief of sneezing, runny nose, watery eyes, and skin hives.", "Avoid taking with fruit juices (apple, orange, grapefruit).", "Headache, drowsiness, nausea.", "Store below 25°C.", false, "AVAILABLE", 185.0, 190, "True non-sedating 2nd generation antihistamine."],
+  ["Benadryl Cough Syrup 150ml", "Diphenhydramine + Ammonium Chloride + Sodium Citrate", "Benadryl", "Johnson & Johnson", "Antihistamine / Allergy", "Syrup", "150ml Bottle", "Relief of dry cough, throat irritation, and chest congestion.", "May cause drowsiness. Avoid driving.", "Drowsiness, dry mouth, dizziness.", "Store at room temperature.", false, "AVAILABLE", 145.0, 220, "Classic cough relief formula."],
+  ["Ascoril LS Cough Syrup 100ml", "Levosalbutamol + Ambroxol + Guaiphenesin", "Ascoril LS", "Glenmark Pharmaceuticals", "Antihistamine / Allergy", "Syrup", "100ml Bottle", "Expectorant for productive wet cough associated with bronchitis and asthma.", "Shake well before use.", "Palpitations, muscle tremors, nausea.", "Store below 30°C.", true, "AVAILABLE", 125.0, 160, "Mucolytic and bronchodilator cough syrup."],
+  ["Asthalin Inhaler 100mcg (Salbutamol)", "Salbutamol (Albuterol)", "Asthalin HFA Inhaler", "Cipla Ltd", "Antihistamine / Allergy", "Inhaler", "100mcg/dose (200 Actuations)", "Quick-relief bronchodilator for acute asthma attack and bronchospasm.", "Rinse mouth with water after inhalation.", "Fine muscle tremors, tachycardia, nervousness.", "Store below 30°C away from heat and sunlight.", true, "AVAILABLE", 155.0, 140, "Fast-acting rescue asthma inhaler."],
+  ["Seroflo 250 Synchrobreathe Inhaler", "Salmeterol + Fluticasone Propionate", "Seroflo 250", "Cipla Ltd", "Antihistamine / Allergy", "Inhaler", "25mcg+250mcg", "Maintenance therapy for asthma and Chronic Obstructive Pulmonary Disease (COPD).", "Rinse mouth thoroughly with water after each use to prevent thrush.", "Oral candidiasis (thrush), hoarseness of voice, throat irritation.", "Store below 30°C.", true, "AVAILABLE", 620.0, 50, "Preventative corticosteroid & LABA inhaler."],
+  ["Otrivin Adult Nasal Spray 10ml", "Xylometazoline Hydrochloride 0.1%", "Otrivin Adult", "GlaxoSmithKline", "Antihistamine / Allergy", "Drops", "10ml Spray", "Fast nasal decongestion for blocked nose caused by cold, sinusitis, or allergy.", "Do not use for more than 7 consecutive days to avoid rebound congestion.", "Transient nasal burning, dry nasal mucosa.", "Store below 30°C.", false, "AVAILABLE", 98.0, 310, "Topical decongestant nasal spray."],
+
+  // Vitamins & Supplements
+  ["Vitamin D3 60,000 IU Capsule", "Cholecalciferol (Vitamin D3)", "Taydo 60K / Uprise-D3", "Sun Pharmaceutical Industries", "Vitamins & Supplements", "Capsule", "60,000 IU", "Correction of severe Vitamin D deficiency, osteoporosis, bone weakness.", "Take once weekly for 8 weeks or as directed.", "Hypercalcemia if taken in massive overdose.", "Store in a dry dark place.", false, "AVAILABLE", 130.0, 250, "High potency weekly Vitamin D3 supplement."],
+  ["Becosules Z Capsule (B-Complex + Zinc)", "Vitamin B-Complex + Vitamin C + Zinc", "Becosules Z", "Pfizer India", "Vitamins & Supplements", "Capsule", "Multivitamin", "Correction of B-vitamin deficiencies, mouth ulcers, hair fall, and fatigue.", "Take one capsule daily after meals.", "Bright yellow discoloration of urine (harmless riboflavin effect).", "Store below 25°C.", false, "AVAILABLE", 52.0, 480, "Classic multivitamin capsule for mouth ulcers."],
+  ["Limcee 500mg Vitamin C Chewable Tablet", "Ascorbic Acid (Vitamin C)", "Limcee 500", "Abbott India", "Vitamins & Supplements", "Chewable Tablet", "500mg", "Immunity booster, scurvy prevention, collagen synthesis, wound healing.", "Chew tablet thoroughly before swallowing.", "Mild gastric discomfort with high doses.", "Store protected from moisture.", false, "AVAILABLE", 24.0, 600, "Orange-flavored chewable Vitamin C tablet."],
+  ["Neurobion Forte Tablet", "Thiamine + Riboflavin + Pyridoxine + Cyanocobalamin", "Neurobion Forte", "Procter & Gamble Health", "Vitamins & Supplements", "Tablet", "Multivitamin B", "Nerve damage, tingling sensation in feet/hands, diabetic neuropathy.", "Take 1 tablet daily.", "Mild nausea, flushing.", "Store below 25°C.", false, "AVAILABLE", 38.0, 550, "Nerve health vitamin B complex tablet."],
+  ["Shelcal 500 Calcium & Vitamin D3 Tablet", "Calcium Carbonate 1250mg + Vitamin D3 250IU", "Shelcal 500", "Torrent Pharmaceuticals", "Vitamins & Supplements", "Tablet", "500mg Elemental Ca", "Prevention and treatment of calcium deficiency, osteopenia, pregnancy supplement.", "Take after meals for optimal absorption.", "Constipation, flatulence.", "Store in a cool dry place.", false, "AVAILABLE", 118.0, 340, "Calcium supplement for strong bones."],
+  ["Evion 400 Vitamin E Softgel Capsule", "Tocopheryl Acetate (Vitamin E)", "Evion 400", "Procter & Gamble Health", "Vitamins & Supplements", "Capsule", "400mg", "Antioxidant protection, muscle cramps, skin hydration, leg cramps.", "Swallow whole with water.", "Nausea, fatigue with very high doses.", "Store below 30°C.", false, "AVAILABLE", 36.0, 410, "Pure Vitamin E softgel capsule."],
+  ["Zincovit Tablet (Multivitamin + Minerals)", "Multivitamins + Multiminerals + Grape Seed Extract", "Zincovit", "Apex Laboratories", "Vitamins & Supplements", "Tablet", "Comprehensive", "General weakness, post-viral recovery, appetite stimulant, nutritional deficit.", "Take 1 tablet daily after food.", "Nausea if taken on empty stomach.", "Store below 25°C.", false, "AVAILABLE", 110.0, 380, "Daily health multivitamin & antioxidant tablet."],
+  ["Dexorange Syrup 200ml (Iron + Folic Acid + B12)", "Ferric Ammonium Citrate + Folic Acid + Cyanocobalamin", "Dexorange", "Franco-Indian Pharmaceuticals", "Vitamins & Supplements", "Syrup", "200ml Bottle", "Iron deficiency anemia, recovery after blood loss, pregnancy anemia.", "Take after food. May darken stools.", "Darkened stools, constipation, nausea.", "Store at room temperature.", false, "AVAILABLE", 165.0, 230, "Haematinic syrup for iron deficiency."],
+
+  // Dermatology & Antifungal
+  ["Clotrimazole 1% Cream 15g", "Clotrimazole", "Candid Cream / Canesten", "Glenmark Pharmaceuticals", "Dermatology / Antifungal", "Cream", "1% w/w (15g)", "Fungal skin infections including ringworm, athlete's foot, jock itch.", "Clean and dry affected area before applying.", "Mild localized skin burning or redness.", "Store below 25°C.", false, "AVAILABLE", 75.0, 240, "Broad spectrum topical antifungal cream."],
+  ["Ketoconazole 2% Antifungal Shampoo 100ml", "Ketoconazole 2%", "Scalpe Pro / Nizral", "Glenmark / Janssen", "Dermatology / Antifungal", "Syrup", "100ml Bottle", "Treatment of stubborn dandruff, seborrheic dermatitis, and scalp fungal infection.", "Leave shampoo on scalp for 3 to 5 minutes before rinsing.", "Mild scalp dryness, texture change.", "Store below 30°C.", false, "AVAILABLE", 285.0, 110, "Medicated anti-dandruff shampoo."],
+  ["Betnovate-N Cream 20g", "Betamethasone Valerate + Neomycin", "Betnovate-N", "GlaxoSmithKline", "Dermatology / Antifungal", "Cream", "20g Tube", "Inflammatory skin disorders (eczema, psoriasis) complicated by secondary bacterial infection.", "Apply sparingly. Do not use on face for prolonged periods.", "Skin thinning, striae with chronic prolonged use.", "Store below 25°C.", true, "AVAILABLE", 48.0, 300, "Topical corticosteroid + antibacterial cream."],
+  ["Luliconazole 1% Cream 30g", "Luliconazole", "Lulifin 1% / Lulimax", "Sun Pharmaceutical Industries", "Dermatology / Antifungal", "Cream", "1% w/w (30g)", "Effective once-daily treatment for tinea corporis, tinea cruris, tinea pedis.", "Apply once daily to affected skin and surrounding 1 inch.", "Mild skin irritation, application site erythema.", "Store below 30°C.", false, "AVAILABLE", 290.0, 85, "Advanced once-daily topical antifungal."],
+  ["Terbinafine 250mg Tablet", "Terbinafine Hydrochloride", "Sebifin 250 / Lamisil", "Sun Pharmaceutical Industries", "Dermatology / Antifungal", "Tablet", "250mg", "Severe fungal nail infections (onychomycosis) and resistant dermatophytosis.", "Perform liver function tests during long courses.", "Taste disturbances, headache, GI distress.", "Store below 25°C.", true, "AVAILABLE", 175.0, 95, "Oral allylamine antifungal tablet."],
+  ["Candid Dusting Powder 100g", "Clotrimazole 1%", "Candid Powder", "Glenmark Pharmaceuticals", "Dermatology / Antifungal", "Powder", "100g Canister", "Prevention and treatment of prickly heat, fungal skin infections, and sweat rash.", "Dust over affected body folds after bathing.", "None under normal topical application.", "Store in a cool dry place.", false, "AVAILABLE", 145.0, 260, "Absorbent antifungal dusting powder."],
+  ["Panderm + Cream 15g", "Clobetasol + Neomycin + Miconazole", "Panderm Plus", "Macleods Pharmaceuticals", "Dermatology / Antifungal", "Cream", "15g Tube", "Triple action cream for mixed skin infections, severe itching, eczema.", "Use under medical supervision only.", "Local skin burning, skin thinning.", "Store below 25°C.", true, "AVAILABLE", 92.0, 190, "Combination anti-inflammatory & antimicrobial cream."],
+
+  // Eye Care & Ear Care
+  ["Ciplox Eye/Ear Drops 10ml", "Ciprofloxacin 0.3%", "Ciplox Drops", "Cipla Ltd", "Eye & Ear Care", "Drops", "10ml Vial", "Bacterial conjunctivitis, corneal ulcers, and otitis externa.", "Do not touch dropper tip to any surface.", "Transient eye stinging, local irritation.", "Store below 25°C. Discard 1 month after opening.", false, "AVAILABLE", 21.0, 380, "Broad spectrum antibiotic eye and ear drops."],
+  ["Refresh Tears Lubricant Eye Drops 10ml", "Carboxymethylcellulose Sodium 0.5%", "Refresh Tears", "Allergan India", "Eye & Ear Care", "Drops", "10ml Vial", "Relief of dry eyes, burning irritation due to computer screens, wind, and air conditioning.", "Instill 1-2 drops in affected eye(s) as needed.", "Temporary blurred vision immediately after drop.", "Store below 25°C.", false, "AVAILABLE", 165.0, 175, "Soothing artificial tears lubricant eye drops."],
+  ["Tobradex Eye Drops 5ml", "Tobramycin + Dexamethasone", "Tobradex", "Alcon / Novartis", "Eye & Ear Care", "Drops", "5ml Vial", "Steroid-responsive inflammatory ocular conditions with bacterial infection risk.", "Shake well before use. Monitor intraocular pressure with extended use.", "Increased intraocular pressure, ocular discomfort.", "Store below 25°C.", true, "AVAILABLE", 210.0, 65, "Steroid and antibiotic combination eye drops."],
+  ["Waxsolve Ear Drops 10ml", "Paradichlorobenzene + Benzocaine + Chlorbutol + Turpentine Oil", "Waxsolve", "NuLife Pharmaceuticals", "Eye & Ear Care", "Drops", "10ml Vial", "Softening and painless removal of hardened ear wax.", "Instill 4-5 drops in ear canal and plug with cotton for 10 minutes.", "Mild tingling sensation in ear.", "Store below 30°C.", false, "AVAILABLE", 85.0, 140, "Effective ear wax dissolving drops."],
+
+  // Neurology & Anticonvulsant & Anti-Anxiety
+  ["Alprazolam 0.25mg Tablet", "Alprazolam", "Alprax 0.25 / Xanax", "Torrent Pharmaceuticals", "Neurology / CNS", "Tablet", "0.25mg", "Short-term relief of anxiety disorders and panic attacks.", "Habit-forming potential. Do not stop abruptly.", "Drowsiness, impaired coordination, fatigue.", "Store below 25°C.", true, "AVAILABLE", 28.0, 160, "Short-acting benzodiazepine anxiolytic."],
+  ["Clonazepam 0.5mg Tablet", "Clonazepam", "Zapiz 0.5 / Clofranil", "Intas Pharmaceuticals", "Neurology / CNS", "Tablet", "0.5mg", "Seizure disorders, panic disorder, akathisia.", "Avoid alcohol consumption. Strict prescription control.", "Sedation, somnolence, muscle weakness.", "Store protected from light.", true, "AVAILABLE", 45.0, 130, "Anticonvulsant and anxiolytic benzodiazepine."],
+  ["Gabapentin 300mg Capsule", "Gabapentin", "Gabapin 300", "Intas Pharmaceuticals", "Neurology / CNS", "Capsule", "300mg", "Neuropathic pain (diabetic nerve pain, post-herpetic neuralgia) and partial seizures.", "Taper off gradually when discontinuing.", "Dizziness, somnolence, peripheral edema.", "Store below 25°C.", true, "AVAILABLE", 148.0, 90, "GABA-analog for neuropathic pain."],
+  ["Pregabalin 75mg Capsule", "Pregabalin", "Lyrica 75 / Pregabid", "Pfizer / Intas", "Neurology / CNS", "Capsule", "75mg", "Fibromyalgia, neuropathic pain, generalized anxiety disorder.", "May cause dizziness; avoid operating heavy machinery.", "Weight gain, dizziness, dry mouth.", "Store below 30°C.", true, "AVAILABLE", 180.0, 110, "Neuropathic analgesic and antiepileptic."],
+  ["Levetiracetam 500mg Tablet", "Levetiracetam", "Keppra 500 / Levera", "UCB / Intas", "Neurology / CNS", "Tablet", "500mg", "Monotherapy and adjunctive therapy for partial onset and generalized tonic-clonic seizures.", "Do not skip doses to maintain therapeutic blood level.", "Somnolence, nasopharyngitis, mood changes.", "Store below 25°C.", true, "AVAILABLE", 190.0, 120, "Broad spectrum antiepileptic medication."],
+
+  // Women's Health & Gynaecology
+  ["Folic Acid 5mg Tablet", "Folic Acid (Vitamin B9)", "Folvite 5mg", "Wyeth / Pfizer", "Women's Health", "Tablet", "5mg", "Prevention of neural tube defects during pregnancy and treatment of megaloblastic anemia.", "Take 1 tablet daily pre-conception and during early pregnancy.", "Rare allergic skin rash.", "Store in dry light-resistant container.", false, "AVAILABLE", 18.50, 500, "Essential pregnancy prenatal vitamin."],
+  ["Norethisterone 5mg Tablet", "Norethisterone", "Primolut-N 5", "Bayer Zydus Pharma", "Women's Health", "Tablet", "5mg", "Delaying menstrual period, endometriosis, dysfunctional uterine bleeding.", "Take under strict gynecological guidance.", "Headache, nausea, breast tenderness, spotting.", "Store below 30°C.", true, "AVAILABLE", 68.0, 140, "Synthetic progestin for menstrual regulation."],
+  ["i-Pill Emergency Contraceptive Tablet", "Levonorgestrel 1.5mg", "i-Pill", "Piramal Pharma", "Women's Health", "Tablet", "1.5mg", "Emergency contraception within 72 hours of unprotected intercourse.", "For emergency use only; not a regular birth control method.", "Nausea, lower abdominal pain, fatigue, altered period timing.", "Store below 25°C.", false, "AVAILABLE", 110.0, 320, "Single-dose emergency contraceptive pill."],
+  ["Unwanted-72 Emergency Contraceptive", "Levonorgestrel 1.5mg", "Unwanted-72", "Mankind Pharma", "Women's Health", "Tablet", "1.5mg", "Prevention of unintended pregnancy following contraceptive failure.", "Take as early as possible after unprotected sex.", "Nausea, headache, spot bleeding.", "Store in a cool dry place.", false, "AVAILABLE", 99.0, 290, "Emergency oral contraceptive tablet."],
+
+  // General Health / First Aid / Misc
+  ["Dettol Antiseptic Liquid 250ml", "Chloroxylenol 4.8% w/v", "Dettol", "Reckitt Benckiser", "General Health", "Solution", "250ml Bottle", "First aid wound cleansing, antiseptic skin washing, household disinfection.", "Dilute before applying to skin or open wounds.", "Mild skin irritation if used undiluted.", "Store below 30°C.", false, "AVAILABLE", 135.0, 210, "Classic first aid antiseptic liquid."],
+  ["Betadine Antiseptic Solution 100ml", "Povidone-Iodine 10% w/v", "Betadine 10%", "Win-Medicare", "General Health", "Solution", "100ml Bottle", "Topical antiseptic for pre-operative skin preparation and infected wounds.", "Avoid in iodine-hypersensitive patients.", "Local skin staining, mild burning sensation.", "Store below 25°C.", false, "AVAILABLE", 120.0, 180, "Povidone iodine germicidal solution."],
+  ["Savlon Antiseptic Liquid 200ml", "Cetrimide 3% + Chlorhexidine Gluconate 0.3%", "Savlon", "ITC Ltd", "General Health", "Solution", "200ml Bottle", "Gentle antiseptic cleansing of cuts, bites, stings, and minor burns.", "Sting-free formula when diluted.", "Rare skin sensitivity.", "Store at room temperature.", false, "AVAILABLE", 95.0, 240, "Sting-free antiseptic disinfectant."],
+  ["Band-Aid Washproof Bandages (Box of 20)", "Medicated Fabric Strip with Benzalkonium Chloride", "Band-Aid", "Johnson & Johnson", "General Health", "Strip", "Box of 20", "Protection of small cuts, scrapes, and punctures against dirt and germs.", "Change dressing daily or when wet.", "Skin irritation from adhesive tape.", "Store in a dry place.", false, "AVAILABLE", 45.0, 400, "Adhesive sterile first aid bandages."],
+  ["Hansaplast Waterproof Dressing Strips (10s)", "Waterproof Polyurethane Film Strip", "Hansaplast", "Beiersdorf", "General Health", "Strip", "Pack of 10", "Waterproof protection for minor wounds during showering or washing.", "Apply on clean dry skin.", "Mild local adhesive redness.", "Store cool and dry.", false, "AVAILABLE", 55.0, 310, "100% waterproof wound protection strips."],
+
+  // Additional 55+ items to comfortably reach 150 items
+  ["Chlorpheniramine Maleate 4mg Tablet", "Chlorpheniramine Maleate", "CPM 4 / Cadistin", "GlaxoSmithKline", "Antihistamine / Allergy", "Tablet", "4mg", "Symptomatic relief of allergic rhinitis, hives, and runny nose.", "Significant sedating effect.", "Drowsiness, dry mouth, blurred vision.", "Store below 30°C.", false, "AVAILABLE", 12.0, 450, "First generation sedating antihistamine."],
+  ["Hydroxyzine Hydrochloride 25mg Tablet", "Hydroxyzine Hydrochloride", "Atarax 25", "Dr. Reddy's Laboratories", "Antihistamine / Allergy", "Tablet", "25mg", "Management of severe skin itching, anxiety, and pre-operative sedation.", "May cause intense drowsiness.", "Drowsiness, dry mouth, dizziness.", "Store below 25°C.", true, "AVAILABLE", 82.0, 140, "Sedating antihistamine and anti-anxiety tablet."],
+  ["Deflazacort 6mg Tablet", "Deflazacort", "Defcort 6", "Macleods Pharmaceuticals", "Antihistamine / Allergy", "Tablet", "6mg", "Glucocorticoid for inflammatory, allergic, and autoimmune conditions.", "Taper dosage gradually under medical supervision.", "Increased appetite, weight gain, Cushingoid features.", "Store below 25°C.", true, "AVAILABLE", 115.0, 110, "Systemic corticosteroid anti-inflammatory."],
+  ["Prednisolone 5mg Tablet", "Prednisolone", "Wysolone 5", "Pfizer India", "Antihistamine / Allergy", "Tablet", "5mg", "Severe asthma, severe allergic reactions, rheumatoid arthritis.", "Take after breakfast with milk.", "GI upset, insomnia, fluid retention.", "Store below 30°C.", true, "AVAILABLE", 15.0, 360, "Short-acting oral steroid tablet."],
+  ["Dexamethasone 0.5mg Tablet", "Dexamethasone", "Dexona 0.5", "Zydus Lifesciences", "Antihistamine / Allergy", "Tablet", "0.5mg", "High potency corticosteroid for severe inflammation and allergic shock.", "Avoid live vaccines during high dose therapy.", "Mood changes, elevated blood sugar.", "Store protected from light.", true, "AVAILABLE", 8.50, 500, "High potency long-acting glucocorticoid."],
+  ["Deriphyllin Retard 150mg Tablet", "Etofylline + Theophylline", "Deriphyllin Retard 150", "Zydus Lifesciences", "Antihistamine / Allergy", "Sustained Release Tablet", "150mg", "Bronchial asthma, chronic bronchitis, and emphysema.", "Monitor pulse rate during therapy.", "Palpitations, insomnia, gastric irritation.", "Store below 30°C.", false, "AVAILABLE", 32.0, 280, "Xanthine derivative bronchodilator."],
+  ["Montek-LC Kid Chewable Tablet", "Montelukast 4mg + Levocetirizine 2.5mg", "Montek-LC Kid", "Mankind Pharma", "Pediatric Care", "Chewable Tablet", "4mg/2.5mg", "Pediatric allergic rhinitis and asthma prevention.", "Chew thoroughly before swallowing at bedtime.", "Headache, fatigue, mild stomach pain.", "Store below 25°C.", true, "AVAILABLE", 85.0, 190, "Pediatric allergy chewable combination tablet."],
+  ["Cyproheptadine 2mg/5ml Syrup", "Cyproheptadine Hydrochloride", "Ciplactin Syrup", "Cipla Ltd", "Pediatric Care", "Syrup", "2mg/5ml (200ml)", "Appetite stimulant and relief of allergic symptoms in children.", "May cause marked drowsiness.", "Drowsiness, increased appetite, weight gain.", "Store below 30°C.", false, "AVAILABLE", 98.0, 160, "Antihistamine and appetite stimulant syrup."],
+  ["Zinc Sulphate Oral Solution 20mg/5ml", "Zinc Sulphate", "Zocon Syrup", "FDC Ltd", "Pediatric Care", "Syrup", "20mg/5ml", "Pediatric zinc supplementation during diarrhea episodes.", "Give for 14 days during acute diarrhea.", "Mild nausea or vomiting.", "Store in a dry place.", false, "AVAILABLE", 42.0, 220, "Essential pediatric zinc supplement solution."],
+  ["Ofloxacin 50mg/5ml Pediatric Suspension", "Ofloxacin", "Oflox Dry Syrup", "Cipla Ltd", "Pediatric Care", "Syrup", "50mg/5ml", "Pediatric bacterial dysentery and ear infections.", "Reconstitute before use.", "Nausea, mild abdominal pain.", "Store below 25°C.", true, "AVAILABLE", 58.0, 130, "Pediatric fluoroquinolone antibiotic suspension."],
+  ["Ibuprofen + Paracetamol Pediatric Suspension", "Ibuprofen 100mg + Paracetamol 162.5mg", "Combiflam Suspension", "Sanofi India", "Pediatric Care", "Syrup", "100mg+162.5mg/5ml", "Pediatric high fever, pain, and swelling.", "Give with food.", "Gastric irritation.", "Store below 30°C.", false, "AVAILABLE", 45.0, 310, "Dual action pediatric pain and fever suspension."],
+  ["Domperidone 5mg/5ml Suspension", "Domperidone", "Vomistop Suspension", "Cipla Ltd", "Pediatric Care", "Syrup", "5mg/5ml", "Pediatric nausea, vomiting, and delayed gastric emptying.", "Give 15 minutes before feed.", "Dry mouth, headache.", "Store below 25°C.", true, "AVAILABLE", 38.0, 200, "Anti-emetic prokinetic suspension for children."],
+  ["Lactulose Solution 100ml", "Lactulose 10g/15ml", "Duphalac / Loose", "Abbott India", "Gastrointestinal / PPI", "Syrup", "100ml Bottle", "Chronic constipation and hepatic encephalopathy.", "Maintain high daily fluid intake.", "Flatulence, abdominal cramps, diarrhea.", "Store between 2°C and 30°C.", false, "AVAILABLE", 185.0, 140, "Osmotic laxative syrup."],
+  ["Cremaffin Emulsion 225ml (Mixed Fruit)", "Liquid Paraffin + Milk of Magnesia", "Cremaffin", "Abbott India", "Gastrointestinal / PPI", "Syrup", "225ml Bottle", "Gentle relief of constipation without painful straining.", "Take at bedtime with water.", "Diarrhea with excessive usage.", "Store in a cool place.", false, "AVAILABLE", 240.0, 120, "Laxative emulsion with stool softener."],
+  ["Sucralfate 1g/5ml Suspension", "Sucralfate", "Sucrafil / Ulgel", "Fourrts India", "Gastrointestinal / PPI", "Syrup", "200ml Bottle", "Cytoprotective treatment of duodenal and gastric ulcers.", "Take on empty stomach 1 hour before meal.", "Constipation, dry mouth.", "Store below 30°C.", true, "AVAILABLE", 215.0, 90, "Mucosal protective coating suspension."],
+  ["Drotaverine 80mg Tablet", "Drotaverine Hydrochloride", "Drotin DS", "Martin & Harris", "Gastrointestinal / PPI", "Tablet", "80mg", "Spasmodic smooth muscle pain in intestinal, biliary, or renal colic.", "Swallow whole with water.", "Dizziness, nausea, palpitations.", "Store below 25°C.", false, "AVAILABLE", 95.0, 210, "Antispasmodic smooth muscle relaxant."],
+  ["Mebeverine 135mg Tablet", "Mebeverine Hydrochloride", "Colospa 135", "Abbott India", "Gastrointestinal / PPI", "Tablet", "135mg", "Irritable Bowel Syndrome (IBS), abdominal cramps, flatulence.", "Take 20 minutes before meals.", "Rare allergic skin reactions.", "Store below 30°C.", true, "AVAILABLE", 230.0, 100, "Musculotropic antispasmodic for IBS."],
+  ["Metoclopramide 10mg Tablet", "Metoclopramide Hydrochloride", "Perinorm 10", "IPCA Laboratories", "Gastrointestinal / PPI", "Tablet", "10mg", "Heartburn, delayed stomach emptying, nausea and vomiting.", "Take 30 mins before meals.", "Drowsiness, restlessness, extrapyramidal symptoms.", "Store protected from light.", true, "AVAILABLE", 18.0, 390, "Dopamine antagonist antiemetic."],
+  ["Activated Charcoal 250mg Tablet", "Activated Charcoal", "Charcocaps", "HealthVit", "Gastrointestinal / PPI", "Tablet", "250mg", "Adsorption of intestinal gas, flatulence, and acute poisoning emergency.", "Do not take concurrently with oral medications.", "Black stools, constipation.", "Store in dry place.", false, "AVAILABLE", 65.0, 150, "Intestinal gas adsorbent tablet."],
+  ["Bacillus Clausii Spores Suspension (5ml)", "Bacillus Clausii Spores", "Enterogermina 2 Billion", "Sanofi India", "Gastrointestinal / PPI", "Syrup", "2 Billion / 5ml Mini Bottle", "Restoration of intestinal gut flora altered during antibiotic therapy.", "Administer orally directly or mix with water/milk.", "Rare hypersensitivity reaction.", "Store below 30°C.", false, "AVAILABLE", 62.0, 400, "Probiotic gut flora restorer oral vial."],
+  ["Voglibose 0.2mg Tablet", "Voglibose", "Vogli 0.2 / Volibo", "Sun Pharmaceutical Industries", "Anti-Diabetic", "Tablet", "0.2mg", "Alpha-glucosidase inhibitor for post-prandial blood glucose spikes.", "Take right before the first bite of each meal.", "Flatulence, abdominal distension, diarrhea.", "Store below 25°C.", true, "AVAILABLE", 85.0, 170, "Post-prandial hyperglycemia antidiabetic."],
+  ["Pioglitazone 15mg Tablet", "Pioglitazone", "Pioz 15 / Senaglit", "USV Pvt Ltd", "Anti-Diabetic", "Tablet", "15mg", "Thiazolidinedione for insulin sensitization in Type 2 Diabetes.", "Monitor for fluid retention and weight gain.", "Weight gain, peripheral edema, risk of fractures.", "Store below 25°C.", true, "LOW STOCK", 72.0, 18, "Insulin sensitizer antidiabetic tablet."],
+  ["Teneligliptin 20mg Tablet", "Teneligliptin Hydrobromide", "Tenepure 20 / Zita-Plus", "Zydus Lifesciences", "Anti-Diabetic", "Tablet", "20mg", "DPP-4 inhibitor for type 2 diabetes glycemic control.", "Take once daily in the morning.", "Hypoglycemia (with sulfonylureas), constipation.", "Store below 30°C.", true, "AVAILABLE", 110.0, 240, "Cost-effective DPP-4 inhibitor tablet."],
+  ["Gliclazide 80mg Tablet", "Gliclazide", "Reclimet / Diamicron", "Servier / Sun Pharma", "Anti-Diabetic", "Tablet", "80mg", "Type 2 diabetes management in adults.", "Take with breakfast.", "Hypoglycemia, mild dyspepsia.", "Store below 30°C.", true, "AVAILABLE", 95.0, 180, "Second generation sulfonylurea antidiabetic."],
+  ["Metformin 1000mg SR Tablet", "Metformin Hydrochloride", "Glycomet 1000 SR", "USV Pvt Ltd", "Anti-Diabetic", "Sustained Release Tablet", "1000mg", "High dose sustained release metformin for severe glycemic control.", "Take after dinner.", "GI discomfort, metallic taste.", "Store below 25°C.", true, "AVAILABLE", 68.0, 310, "High dose SR metformin formulation."],
+  ["Chlorthalidone 12.5mg Tablet", "Chlorthalidone", "Thalitone / CTD 12.5", "Torrent Pharmaceuticals", "Cardiovascular / Statin", "Tablet", "12.5mg", "Long-acting thiazide-like diuretic for hypertension and edema.", "Monitor serum potassium levels.", "Hypokalemia, hyperuricemia, dizziness.", "Store below 25°C.", true, "AVAILABLE", 65.0, 140, "Thiazide-like antihypertensive diuretic."],
+  ["Olmesartan Medoxomil 20mg Tablet", "Olmesartan Medoxomil", "Olmy 20 / Benicar", "Glenmark Pharmaceuticals", "Cardiovascular / Statin", "Tablet", "20mg", "Angiotensin II receptor blocker for essential hypertension.", "Monitor serum creatinine.", "Dizziness, bronchitis, back pain.", "Store below 30°C.", true, "AVAILABLE", 135.0, 190, "Potent ARB blood pressure lowering tablet."],
+  ["Bisoprolol Fumarate 5mg Tablet", "Bisoprolol Fumarate", "Concor 5", "Merck Ltd", "Cardiovascular / Statin", "Tablet", "5mg", "Highly selective beta-1 blocker for hypertension and heart failure.", "Do not stop treatment abruptly.", "Bradycardia, fatigue, dizziness.", "Store below 25°C.", true, "AVAILABLE", 140.0, 210, "Selective beta-blocker heart medication."],
+  ["Nebivolol 5mg Tablet", "Nebivolol Hydrochloride", "Nebicard 5", "Torrent Pharmaceuticals", "Cardiovascular / Statin", "Tablet", "5mg", "Hypertension with nitric-oxide mediated vasodilatory property.", "Monitor heart rate.", "Headache, dizziness, paresthesia.", "Store below 30°C.", true, "AVAILABLE", 125.0, 150, "Vasodilatory beta blocker antihypertensive."],
+  ["Spironolactone 25mg Tablet", "Spironolactone", "Aldactone 25", "RPG Life Sciences", "Cardiovascular / Statin", "Tablet", "25mg", "Potassium-sparing diuretic for hypertension, edema, and ascites.", "Monitor serum potassium for hyperkalemia.", "Hyperkalemia, gynecomastia, lethargy.", "Store protected from light.", true, "AVAILABLE", 54.0, 180, "Aldosterone antagonist potassium-sparing diuretic."],
+  ["Isosorbide Mononitrate 20mg Tablet", "Isosorbide Mononitrate", "Ismo 20 / Monotrate", "Abbott India", "Cardiovascular / Statin", "Tablet", "20mg", "Prophylaxis of angina pectoris in coronary artery disease.", "Maintain a nitrate-free interval daily to prevent tolerance.", "Headache, dizziness, orthostatic hypotension.", "Store below 25°C.", true, "AVAILABLE", 48.0, 160, "Long-acting organic nitrate vasodilator."],
+  ["Nitroglycerin 2.6mg Controlled Release", "Nitroglycerin", "Nitrocontin 2.6", "Modi-Mundipharma", "Cardiovascular / Statin", "Controlled Release Tablet", "2.6mg", "Prevention of angina attacks in heart patients.", "Swallow whole.", "Transient throbbing headache, dizziness.", "Store below 25°C.", true, "LOW STOCK", 195.0, 15, "Controlled release angina prophylaxis."],
+  ["Fenofibrate 160mg Tablet", "Fenofibrate", "Lipicard 160", "Sun Pharmaceutical Industries", "Cardiovascular / Statin", "Tablet", "160mg", "Hypertriglyceridemia and severe mixed dyslipidemia.", "Take with food.", "Abdominal pain, back pain, elevated liver transaminases.", "Store below 30°C.", true, "AVAILABLE", 210.0, 110, "Fibrate class triglyceride-lowering drug."],
+  ["Ezetimibe 10mg Tablet", "Ezetimibe", "Ezetrol 10 / Ezeta", "Sun Pharma", "Cardiovascular / Statin", "Tablet", "10mg", "Inhibitor of intestinal cholesterol absorption used with statins.", "Can be taken with or without food.", "Diarrhea, fatigue, arthralgia.", "Store below 30°C.", true, "AVAILABLE", 180.0, 95, "Selective cholesterol absorption inhibitor."],
+  ["Diltiazem Hydrochloride 30mg Tablet", "Diltiazem Hydrochloride", "Dilzem 30", "Torrent Pharmaceuticals", "Cardiovascular / Statin", "Tablet", "30mg", "Angina pectoris, hypertension, supraventricular arrhythmias.", "Monitor blood pressure and ECG.", "Bradycardia, ankle edema, flushing.", "Store below 25°C.", true, "AVAILABLE", 42.0, 130, "Benzothiazepine calcium channel blocker."],
+  ["Verapamil 40mg Tablet", "Verapamil Hydrochloride", "Isoptin 40", "Abbott India", "Cardiovascular / Statin", "Tablet", "40mg", "Supraventricular tachycardia, angina, hypertension.", "Contraindicated in severe heart block.", "Constipation, dizziness, hypotension.", "Store below 30°C.", true, "AVAILABLE", 35.0, 110, "Non-dihydropyridine calcium antagonist."],
+  ["Sildenafil 50mg Tablet", "Sildenafil Citrate", "Viagra / Manforce 50", "Pfizer / Mankind", "General Health", "Tablet", "50mg", "Erectile dysfunction and pulmonary arterial hypertension.", "Take 1 hour before activity. Avoid nitrates.", "Flushing, headache, nasal congestion, dyspepsia.", "Store below 30°C.", true, "AVAILABLE", 220.0, 280, "PDE5 inhibitor for vascular function."],
+  ["Tadalafil 20mg Tablet", "Tadalafil", "Cialis 20 / Megalis", "Lilly / Macleods", "General Health", "Tablet", "20mg", "Erectile dysfunction and benign prostatic hyperplasia (BPH).", "Long duration of action up to 36 hours. Do not use with nitrates.", "Headache, back pain, myalgia, flushing.", "Store below 25°C.", true, "AVAILABLE", 280.0, 190, "Long-acting PDE5 inhibitor tablet."],
+  ["Tamsulosin Hydrochloride 0.4mg Capsule", "Tamsulosin Hydrochloride", "Urimax 0.4 / Flomax", "Cipla Ltd", "General Health", "Capsule", "0.4mg", "Symptomatic treatment of Benign Prostatic Hyperplasia (BPH).", "Take 30 minutes after the same meal each day.", "Dizziness, retrograde ejaculation, rhinitis.", "Store below 30°C.", true, "AVAILABLE", 195.0, 220, "Selective alpha-1a adrenergic receptor blocker."],
+  ["Finasteride 5mg Tablet", "Finasteride", "Proscar 5 / Finast", "Dr. Reddy's Laboratories", "General Health", "Tablet", "5mg", "Benign prostatic hyperplasia and male pattern hair loss (1mg).", "Pregnant women should not handle crushed tablets.", "Decreased libido, erectile dysfunction.", "Store below 25°C.", true, "AVAILABLE", 240.0, 130, "5-alpha reductase inhibitor for prostate health."],
+  ["Clomifene Citrate 50mg Tablet", "Clomifene Citrate", "Clofert 50", "Maneesh Pharmaceuticals", "Women's Health", "Tablet", "50mg", "Ovulatory failure in women desiring pregnancy (Anovulatory infertility).", "Take under specialist gynecological supervision.", "Ovarian enlargement, hot flashes, abdominal discomfort.", "Store protected from light.", true, "AVAILABLE", 165.0, 80, "Selective estrogen receptor modulator for ovulation."],
+  ["Progesterone 200mg Softgel Capsule", "Micronized Progesterone", "Susten 200", "Sun Pharmaceutical Industries", "Women's Health", "Capsule", "200mg", "Luteal phase support in assisted reproduction, threatened abortion.", "Take at bedtime to minimize somnolence.", "Drowsiness, dizziness, breast tenderness.", "Store below 25°C.", true, "AVAILABLE", 340.0, 140, "Natural micronized progesterone softgel."],
+  ["Cabergoline 0.5mg Tablet", "Cabergoline", "Dostinex / Cabergolin 0.5", "Pfizer / Sun Pharma", "Women's Health", "Tablet", "0.5mg", "Inhibition of physiological lactation, hyperprolactinemia.", "Take with food.", "Nausea, headache, dizziness, fatigue.", "Store in original bottle.", true, "LOW STOCK", 450.0, 12, "Dopamine receptor agonist for hyperprolactinemia."],
+  ["Tranexamic Acid 500mg Tablet", "Tranexamic Acid", "Paused 500 / Trenexa", "Emcure Pharmaceuticals", "Women's Health", "Tablet", "500mg", "Heavy menstrual bleeding (menorrhagia) and surgical bleeding.", "Contraindicated in active thromboembolic disease.", "Nausea, diarrhea, allergic dermatitis.", "Store below 30°C.", true, "AVAILABLE", 185.0, 170, "Antifibrinolytic hemostatic drug."],
+  ["Myo-Inositol 1000mg + D-Chiro-Inositol 25mg", "Myo-Inositol + D-Chiro-Inositol + Folic Acid", "Ovacare / CVP-PCOS", "Meyer Organics", "Women's Health", "Tablet", "1000mg/25mg", "Management of Polycystic Ovary Syndrome (PCOS) symptoms.", "Take twice daily after meals.", "Mild gastric discomfort.", "Store below 25°C.", false, "AVAILABLE", 295.0, 210, "Inositol supplement for PCOS hormonal balance."],
+  ["Calcium Citrate 1000mg + Vitamin D3", "Calcium Citrate + Vitamin D3 + Magnesium + Zinc", "Calcirol HD / Citracal", "Cadila Healthcare", "Vitamins & Supplements", "Tablet", "1000mg", "Osteoporosis prevention, bone healing, and post-menopausal bone density.", "Better absorbed than calcium carbonate without stomach acid requirement.", "Mild gas or bloating.", "Store below 30°C.", false, "AVAILABLE", 165.0, 310, "Highly bioavailable calcium citrate supplement."],
+  ["Glucosamine 750mg + Chondroitin 600mg", "Glucosamine Sulfate + Chondroitin Sulfate", "Jointace DN", "Meyer Organics", "Vitamins & Supplements", "Tablet", "750mg/600mg", "Osteoarthritis joint cartilage support and flexibility improvement.", "Consistent long-term use recommended.", "Mild nausea, heartburn.", "Store below 25°C.", false, "AVAILABLE", 320.0, 180, "Joint cartilage rebuild supplement combo."],
+  ["Risedronate Sodium 35mg Tablet", "Risedronate Sodium", "Actonel 35 / Risofos", "Cipla Ltd", "Vitamins & Supplements", "Tablet", "35mg", "Once-weekly treatment of postmenopausal osteoporosis.", "Take first thing in morning with full glass of plain water. Remain upright 30 mins.", "Esophagitis, bone pain, dyspepsia.", "Store below 25°C.", true, "AVAILABLE", 240.0, 70, "Bisphosphonate once-weekly bone density tablet."],
+  ["Thiocolchicoside 4mg Capsule", "Thiocolchicoside", "Myoril 4", "Sanofi India", "Analgesic & Antipyretic", "Capsule", "4mg", "Painful muscle spasms in spinal cord disorders, back pain.", "Take after food.", "Somnolence, nausea, vasovagal reaction.", "Store below 25°C.", true, "AVAILABLE", 195.0, 150, "Muscle relaxant for acute back spasms."],
+  ["Baclofen 10mg Tablet", "Baclofen", "Lioresal 10 / Lioresal", "Novartis / Sun Pharma", "Analgesic & Antipyretic", "Tablet", "10mg", "Spasticity resulting from multiple sclerosis or spinal cord lesions.", "Taper gradually to prevent withdrawal seizures.", "Sedation, muscle weakness, confusion.", "Store below 30°C.", true, "AVAILABLE", 88.0, 120, "GABA-B agonist skeletal muscle relaxant."],
+  ["Chlorzoxazone 250mg + Paracetamol 325mg", "Chlorzoxazone + Paracetamol + Aceclofenac", "Flexon MR", "Aristo Pharmaceuticals", "Analgesic & Antipyretic", "Tablet", "250mg/325mg", "Musculoskeletal pain associated with painful muscle spasms.", "May cause orange/red urine discoloration.", "Drowsiness, dizziness, lightheadedness.", "Store below 25°C.", false, "AVAILABLE", 78.0, 230, "Muscle relaxant and analgesic combination."],
+  ["Clobetasol Propionate 0.05% Ointment 30g", "Clobetasol Propionate", "Tenovate Ointment", "GlaxoSmithKline", "Dermatology / Antifungal", "Ointment", "0.05% w/w (30g)", "Short-term treatment of recalcitrant dermatoses, severe psoriasis.", "Ultra-high potency steroid. Do not use continuously over 2 weeks.", "Skin atrophy, telangiectasia.", "Store below 25°C.", true, "AVAILABLE", 145.0, 160, "Ultra-high potency topical corticosteroid."],
+  ["Mupirocin 2% Ointment 5g", "Mupirocin", "Bactroban / T-Bact", "GlaxoSmithKline", "Dermatology / Antifungal", "Ointment", "2% w/w (5g)", "Topical treatment of impetigo and traumatic secondary skin infections.", "Apply 3 times daily to clean area.", "Mild burning at application site.", "Store below 25°C.", true, "AVAILABLE", 125.0, 210, "Topical antibacterial ointment for skin infections."],
+  ["Tacrolimus 0.1% Ointment 10g", "Tacrolimus", "Tacroz 0.1%", "Glenmark Pharmaceuticals", "Dermatology / Antifungal", "Ointment", "0.1% w/w (10g)", "Moderate to severe atopic dermatitis (eczema) in non-immunocompromised patients.", "Avoid sunlight exposure to treated areas.", "Local skin burning sensation, erythema.", "Store below 25°C.", true, "AVAILABLE", 310.0, 85, "Non-steroidal topical calcineurin inhibitor."],
+  ["Isotretinoin 20mg Softgel Capsule", "Isotretinoin", "Sotret 20 / Isotroin", "Sun Pharmaceutical Industries", "Dermatology / Antifungal", "Capsule", "20mg", "Severe recalcitrant nodular acne unresponsive to conventional therapy.", "Strictly teratogenic! Require pregnancy prevention program.", "Severe dry lips, skin peeling, elevated lipids, dry eyes.", "Store protected from light.", true, "AVAILABLE", 380.0, 90, "Systemic retinoid for severe recalcitrant acne."],
+  ["Adapalen 0.1% + Benzoyl Peroxide 2.5% Gel", "Adapalene + Benzoyl Peroxide", "Deriva-BPO Gel", "Glenmark Pharmaceuticals", "Dermatology / Antifungal", "Gel", "0.1%/2.5% (15g)", "Topical treatment of acne vulgaris with blackheads & pustules.", "Apply thin layer once daily in evening before sleep.", "Dryness, peeling, redness, localized skin burning.", "Store below 25°C.", false, "AVAILABLE", 245.0, 140, "Combination retinoid & peroxide anti-acne gel."],
+  ["Permethrin 5% Cream 60g", "Permethrin", "Scabaper 5% / Permite", "Micro Labs Ltd", "Dermatology / Antifungal", "Cream", "5% w/w (60g)", "Treatment of scabies infestation and crab lice.", "Apply from neck to soles of feet. Wash off after 8-14 hours.", "Mild temporary skin burning, itching.", "Store below 25°C.", false, "AVAILABLE", 95.0, 190, "Scabicidal cream for skin mite elimination."],
+  ["Coal Tar 1% + Salicylic Acid 3% Ointment", "Coal Tar + Salicylic Acid", "Ionax-T / Salytar", "Galderma / Cipla", "Dermatology / Antifungal", "Ointment", "1%/3% (50g)", "Psoriasis of body & scalp, seborrheic dermatitis, chronic eczema.", "Apply to lesions 1-2 times daily.", "Staining of skin and clothes, mild irritation.", "Store below 30°C.", false, "AVAILABLE", 185.0, 120, "Keratolytic and anti-psoriatic ointment."],
+  ["Hydroquinone 2% + Tretinoin + Mometasone", "Hydroquinone + Tretinoin + Mometasone", "Melacare Cream", "PharmaMedico", "Dermatology / Antifungal", "Cream", "15g Tube", "Short-term treatment of moderate-to-severe melasma of face.", "Use strictly at night with sunscreen during daytime.", "Erythema, skin desquamation, photosensitivity.", "Store below 25°C.", true, "AVAILABLE", 165.0, 160, "Triple combination skin depigmentation cream."],
+  ["Minoxidil 5% Topical Solution 60ml", "Minoxidil 5%", "Mintop 5 / Tugain", "Dr. Reddy's Laboratories", "Dermatology / Antifungal", "Solution", "60ml Spray/Dropper", "Treatment of male pattern androgenetic alopecia (hair loss).", "Apply 1ml twice daily to dry scalp.", "Scalp irritation, dryness, unwanted facial hair growth.", "Store below 30°C. Flammable.", false, "AVAILABLE", 650.0, 230, "Topical vasodilator solution for hair regrowth."],
+  ["Sodium Hyaluronate 0.18% Eye Drops 10ml", "Sodium Hyaluronate", "Hylone / Vismed", "Lupin Ltd", "Eye & Ear Care", "Drops", "10ml Bottle", "Intense lubrication for severe dry eye syndrome and post-LASIK care.", "Preservative-free compatible with contact lenses.", "Transient minor blurriness.", "Store below 25°C.", false, "AVAILABLE", 320.0, 150, "Hyaluronic acid viscoelastic eye drops."],
+  ["Olopatadine 0.1% Ophthalmic Solution", "Olopatadine Hydrochloride", "Opat 0.1% / Patanol", "Alcon / Sun Pharma", "Eye & Ear Care", "Drops", "5ml Bottle", "Treatment of ocular itching associated with allergic conjunctivitis.", "Instill 1 drop in affected eye twice daily.", "Transient eye burning, dry eye sensation.", "Store below 25°C.", true, "AVAILABLE", 145.0, 180, "Dual action antihistamine and mast cell stabilizer."],
+  ["Nepafenac 0.1% Ophthalmic Suspension", "Nepafenac", "Nevanac 0.1%", "Alcon Laboratories", "Eye & Ear Care", "Drops", "5ml Bottle", "Prevention of ocular pain and inflammation associated with cataract surgery.", "Shake well before instilling.", "Ocular discomfort, sticky sensation.", "Store below 25°C.", true, "AVAILABLE", 235.0, 95, "NSAID eye drops for post-op eye inflammation."],
+  ["Ofloxacin 0.3% + Dexamethasone 0.1% Ear Drops", "Ofloxacin + Dexamethasone", "Oflox-D Ear Drops", "Cipla Ltd", "Eye & Ear Care", "Drops", "10ml Vial", "Otitis externa and chronic suppurative otitis media with perforated eardrum.", "Instill 4 drops into affected ear twice daily.", "Local ear discomfort.", "Store below 25°C.", true, "AVAILABLE", 55.0, 270, "Combined fluoroquinolone and steroid ear drops."],
+  ["Clotrimazole 1% Ear Drops 10ml", "Clotrimazole 1%", "Candid Ear Drops", "Glenmark Pharmaceuticals", "Eye & Ear Care", "Drops", "10ml Bottle", "Fungal ear infections (otomycosis).", "Instill 4-5 drops 3-4 times daily.", "Mild ear canal stinging.", "Store below 30°C.", false, "AVAILABLE", 68.0, 210, "Topical antifungal ear drops."]
+];
+
+const allMedicines = [...initial10];
+
+let idCount = 111;
+for (const item of items) {
+  allMedicines.push({
+    id: `med-${idCount++}`,
+    name: item[0],
+    genericName: item[1],
+    brandName: item[2],
+    manufacturer: item[3],
+    category: item[4],
+    dosageForm: item[5],
+    strength: item[6],
+    uses: item[7],
+    precautions: item[8],
+    sideEffects: item[9],
+    storage: item[10],
+    prescriptionRequired: item[11],
+    availabilityStatus: item[12],
+    price: item[13],
+    stockCount: item[14],
+    description: item[15],
+    drugInteractions: 'Consult prescribing doctor or pharmacist before co-administering with other medications.'
+  });
+}
+
+console.log(`Generated ${allMedicines.length} total medicine records.`);
+
+// Validate duplicates
+const seenIds = new Set();
+for (const m of allMedicines) {
+  if (seenIds.has(m.id)) {
+    throw new Error(`Duplicate ID found: ${m.id}`);
+  }
+  seenIds.add(m.id);
+}
+console.log('ID uniqueness check passed successfully!');
+
+// 1. Update frontend/src/data/medicines.ts
+const frontendFile = path.join(__dirname, '../frontend/src/data/medicines.ts');
+const frontendContent = `import type { Medicine } from '../types';\n\nexport const initialMedicines: Medicine[] = ${JSON.stringify(allMedicines, null, 2)};\n`;
+fs.writeFileSync(frontendFile, frontendContent, 'utf-8');
+console.log(`Updated ${frontendFile}`);
+
+// 2. Update backend/src/data/initialData.ts
+const backendInitialDataFile = path.join(__dirname, '../backend/src/data/initialData.ts');
+let backendContent = fs.readFileSync(backendInitialDataFile, 'utf-8');
+
+const medStart = backendContent.indexOf('export const initialMedicines: Medicine[] = [');
+const medEnd = backendContent.indexOf('export const initialPharmacies: Pharmacy[] = [');
+
+if (medStart !== -1 && medEnd !== -1) {
+  const newMedicinesSection = `export const initialMedicines: Medicine[] = ${JSON.stringify(allMedicines, null, 2)};\n\n`;
+  backendContent = backendContent.substring(0, medStart) + newMedicinesSection + backendContent.substring(medEnd);
+  fs.writeFileSync(backendInitialDataFile, backendContent, 'utf-8');
+  console.log(`Updated ${backendInitialDataFile}`);
+}
+
+// 3. Update backend/data/db.json
+const dbJsonFile = path.join(__dirname, '../backend/data/db.json');
+if (fs.existsSync(dbJsonFile)) {
+  try {
+    const dbData = JSON.parse(fs.readFileSync(dbJsonFile, 'utf-8'));
+    dbData.medicines = allMedicines;
+    fs.writeFileSync(dbJsonFile, JSON.stringify(dbData, null, 2), 'utf-8');
+    console.log(`Updated ${dbJsonFile}`);
+  } catch (err) {
+    console.error('Failed to update db.json:', err);
+  }
+}
+
+// 4. Update backend/seed.py
+const seedPyFile = path.join(__dirname, '../backend/seed.py');
+if (fs.existsSync(seedPyFile)) {
+  let seedContent = fs.readFileSync(seedPyFile, 'utf-8');
+  const pyMedStart = seedContent.indexOf('initial_medicines = [');
+  const pyMedEnd = seedContent.indexOf('initial_pharmacies = [');
+
+  if (pyMedStart !== -1 && pyMedEnd !== -1) {
+    const pyMeds = allMedicines.map(m => {
+      return `            {
+                "id": ${JSON.stringify(m.id)},
+                "name": ${JSON.stringify(m.name)},
+                "generic_name": ${JSON.stringify(m.genericName)},
+                "brand_name": ${JSON.stringify(m.brandName)},
+                "manufacturer": ${JSON.stringify(m.manufacturer)},
+                "category": ${JSON.stringify(m.category)},
+                "dosage_form": ${JSON.stringify(m.dosageForm)},
+                "strength": ${JSON.stringify(m.strength)},
+                "uses": ${JSON.stringify(m.uses)},
+                "precautions": ${JSON.stringify(m.precautions)},
+                "side_effects": ${JSON.stringify(m.sideEffects)},
+                "storage": ${JSON.stringify(m.storage)},
+                "prescription_required": ${m.prescriptionRequired ? 'True' : 'False'},
+                "availability_status": ${JSON.stringify(m.availabilityStatus)},
+                "price": ${m.price},
+                "description": ${JSON.stringify(m.description)},
+                "drug_interactions": ${JSON.stringify(m.drugInteractions)},
+                "stock_count": ${m.stockCount}
+            }`;
+    }).join(',\n');
+
+    const pySection = `initial_medicines = [\n${pyMeds}\n        ]\n\n        `;
+    seedContent = seedContent.substring(0, pyMedStart) + pySection + seedContent.substring(pyMedEnd);
+    fs.writeFileSync(seedPyFile, seedContent, 'utf-8');
+    console.log(`Updated ${seedPyFile}`);
+  }
+}
